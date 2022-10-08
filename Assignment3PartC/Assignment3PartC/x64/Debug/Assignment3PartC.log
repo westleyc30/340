@@ -1,0 +1,3 @@
+﻿  Assignment3PartC.cpp
+C:\Users\Westley\OneDrive\Documents\School\340\Assignment3PartC\Assignment3PartC\Assignment3PartC.cpp(136,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Assignment3PartC.vcxproj -> C:\Users\Westley\OneDrive\Documents\School\340\Assignment3PartC\x64\Debug\Assignment3PartC.exe
