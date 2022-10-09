@@ -7,21 +7,22 @@
 #include <unordered_map>
 using namespace std;
 
-vector<string> loadData(string);
-string returnWord(string);
+vector<string> loadData(const string&);
+string returnWord(const string&);
 string getKey(string);
 string getDefinitions(string);
-vector<string> splitDefinitions(string);
-tuple<string, string, int> createTuple(string);
+vector<string> splitDefinitions(const string&);
+tuple<string, string, int> createTuple(const string&);
 int getTuplePosition(vector<tuple<string, string, int>>& v, string p, string d);
 bool checkTuple(vector<tuple<string, string, int>>, string, string);
 vector<tuple<string, string, int>> fillDefinitionsVector(vector<string>);
-void fillMap(unordered_map <string, vector<tuple<string, string, int>>>&, vector<string>);
+void fillMap(unordered_map <string, vector<tuple<string, string, int>>>&, vector<string>, vector<string>);
 
 // filter functions
-void sortVectorByDefinition(string, vector<tuple<string, string, int>>, vector<string>);
-int findStart(string, vector<tuple<string, string, int>>, vector<string>);
-int findEnd(string, vector<tuple<string, string, int>>, vector<string>);
+bool compareTuplesByDefinition(tuple<string, string, int>, tuple<string, string, int>);
+void sortDefinitions(vector<string>, vector<tuple<string, string, int>>);
+int findStart(string, vector<tuple<string, string, int>>);
+int findEnd(string, vector<tuple<string, string, int>>);
 
 // User interface Functions
 void initiateInterface();
@@ -54,14 +55,14 @@ int main()
             "pronoun",
             "verb"
     };
-    fillMap(book, rawData);
+    fillMap(book, rawData, partsOfSpeech);
 
-    for (auto x : book) {
+    for (const auto& x : book) {
         //cout << "hello" << endl;
         string pos, def;
         int n;
         cout << x.first << endl;
-        for (tuple<string, string, int> v : x.second) {
+        for (const tuple<string, string, int>& v : x.second) {
             tie(pos, def, n) = v;
             cout << pos << " | " << def << " | " << n << endl;
         }
@@ -80,7 +81,7 @@ int main()
     //}
 }
 
-vector<string> loadData(string a) {
+vector<string> loadData(const string& a) {
     fstream ioFile;
     string line, fileName;
     vector<string> rawData = {};
@@ -101,7 +102,7 @@ vector<string> loadData(string a) {
     return rawData;
 }
 
-string returnWord(string str) {
+string returnWord(const string& str) {
     stringstream ss(str);
     string word;
     while (!ss.eof()) {
@@ -128,7 +129,7 @@ string getDefinitions(string str) {
     }
     return str.substr(count, str.length());
 }
-vector<string> splitDefinitions(string str) {
+vector<string> splitDefinitions(const string& str) {
     vector<string> definitions = {};
     stringstream ss(str);
     string def;
@@ -147,7 +148,7 @@ vector<string> splitDefinitions(string str) {
 // add part of speech
 // definition
 // number of times it appears
-tuple<string, string, int> createTuple(string str) {
+tuple<string, string, int> createTuple(const string& str) {
     int arrowStart = str.find(' ');
     // cout << arrowStart << endl;
     string pos, def;
@@ -173,14 +174,14 @@ int getTuplePosition(vector<tuple<string, string, int>>& v, string p, string d) 
     return -1;
 }
 
-vector<tuple<string, string, int>> fillDefinitionsVector(vector<string> v) {
+vector<tuple<string, string, int>> fillDefinitionsVector(vector<string> v, vector<string>& pos) {
     vector<tuple<string, string, int>> output = {};
     tuple<string, string, int> temp;
     string str, tempDef, tempPos;
     int position;
     for (int i = 1; i < v.size(); i++) {
         str = v[i];
-        if (output.size() == 0) {
+        if (output.empty()) {
             output.push_back(createTuple(str));
         }
         else {
@@ -196,10 +197,11 @@ vector<tuple<string, string, int>> fillDefinitionsVector(vector<string> v) {
         }
     }
     sort(output.begin(), output.end());
+    sortDefinitions(pos, output);
     return output;
 }
 
-void fillMap(unordered_map <string, vector<tuple<string, string, int>>>& map, vector<string> data) {
+void fillMap(unordered_map <string, vector<tuple<string, string, int>>>& map, vector<string> data, vector<string>& pos) {
     string key, definitions;
     vector<string> storeRawDefinitions;
     vector<tuple<string, string, int>> storeDefinitions;
@@ -214,13 +216,24 @@ void fillMap(unordered_map <string, vector<tuple<string, string, int>>>& map, ve
 }
 
 
-void sortVectorByDefinition(string pos, vector<tuple<string, string, int>>& v, const vector<string>& vp) {
-    int i, j= 0;
-    while (j <= v.size()) {
-
-    }
+bool compareTuplesByDefinition(
+        tuple<string, string, int> a,
+        tuple<string, string, int> b) {
+    return (get<1>(a) < get<1>(b));
 }
-int findStart(string p, vector<tuple<string, string, int>>& v, const vector<string>& vp) {
+void sortDefinitions(vector<string>& partsOfSpeech, vector<tuple<string, string, int>> vt) {
+    for (const string& p : partsOfSpeech) {
+        int end;
+        int start = findStart(p, vt);
+        if (start != -1) {
+            end = findEnd(p, vt);
+            sort(vt.begin() + start, vt.begin() + end, compareTuplesByDefinition);
+        }
+    }
+
+}
+
+int findStart(const string& p, vector<tuple<string, string, int>>& v) {
     string partOfSpeech;
     for (int i = 0; i < v.size(); i++) {
         tie(partOfSpeech, ignore, ignore) = v.at(i);
@@ -230,8 +243,14 @@ int findStart(string p, vector<tuple<string, string, int>>& v, const vector<stri
     }
     return -1;
 }
-int findEnd(string pos, vector<tuple<string, string, int>>& v, const vector<string>& vp) {
-    string current, next;
+int findEnd(const string& p, vector<tuple<string, string, int>>& v) {
+    string current, next, partOfSpeech;
+    for (int i = v.size(); i <= 0; i--) {
+        tie(partOfSpeech, ignore, ignore) = v.at(i);
+        if (partOfSpeech == p) {
+            return i + 1;
+        }
+    }
     return -1;
 }
 
