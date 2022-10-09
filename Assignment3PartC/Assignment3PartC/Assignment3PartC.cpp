@@ -18,6 +18,11 @@ bool checkTuple(vector<tuple<string, string, int>>, string, string);
 vector<tuple<string, string, int>> fillDefinitionsVector(vector<string>);
 void fillMap(unordered_map <string, vector<tuple<string, string, int>>>&, vector<string>);
 
+// filter functions
+void sortVectorByDefinition(string, vector<tuple<string, string, int>>, vector<string>);
+int findStart(string, vector<tuple<string, string, int>>, vector<string>);
+int findEnd(string, vector<tuple<string, string, int>>, vector<string>);
+
 // User interface Functions
 void initiateInterface();
 void help();
@@ -39,18 +44,28 @@ int main()
 {
     unordered_map <string, vector<tuple<string, string, int>>> book;
     vector<string> rawData = loadData("Data.CS.SFSU.txt");
+    vector<string> partsOfSpeech = {
+            "adjective",
+            "adverb",
+            "conjunction",
+            "interjection",
+            "noun",
+            "preposition",
+            "pronoun",
+            "verb"
+    };
     fillMap(book, rawData);
 
-    //for (auto x : book) {
-    //    //cout << "hello" << endl;
-    //    string pos, def;
-    //    int n;
-    //    cout << x.first << endl;
-    //    for (tuple<string, string, int> v : x.second) {
-    //        tie(pos, def, n) = v;
-    //        cout << pos << " | " << def << " | " << n << endl;
-    //    }
-    //}
+    for (auto x : book) {
+        //cout << "hello" << endl;
+        string pos, def;
+        int n;
+        cout << x.first << endl;
+        for (tuple<string, string, int> v : x.second) {
+            tie(pos, def, n) = v;
+            cout << pos << " | " << def << " | " << n << endl;
+        }
+    }
 
 
     //vector<string> x = splitDefinitions(getDefinitions(rawData[8]));
@@ -180,6 +195,7 @@ vector<tuple<string, string, int>> fillDefinitionsVector(vector<string> v) {
             }
         }
     }
+    sort(output.begin(), output.end());
     return output;
 }
 
@@ -195,6 +211,28 @@ void fillMap(unordered_map <string, vector<tuple<string, string, int>>>& map, ve
         //cout << key << endl;
         map[key] = storeDefinitions;
     }
+}
+
+
+void sortVectorByDefinition(string pos, vector<tuple<string, string, int>>& v, const vector<string>& vp) {
+    int i, j= 0;
+    while (j <= v.size()) {
+
+    }
+}
+int findStart(string p, vector<tuple<string, string, int>>& v, const vector<string>& vp) {
+    string partOfSpeech;
+    for (int i = 0; i < v.size(); i++) {
+        tie(partOfSpeech, ignore, ignore) = v.at(i);
+        if (partOfSpeech == p) {
+            return i;
+        }
+    }
+    return -1;
+}
+int findEnd(string pos, vector<tuple<string, string, int>>& v, const vector<string>& vp) {
+    string current, next;
+    return -1;
 }
 
 
